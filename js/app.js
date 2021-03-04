@@ -1,60 +1,61 @@
 // Seleccionadores
-const formulario = document.querySelector('#formulario');
-const resultado = document.querySelector('#resultado');
-const contenido = document.querySelector('.container');
+const form = document.querySelector('#form');
+const result = document.querySelector('#result');
+const container = document.querySelector('.container');
 
 window.addEventListener('load', () => {
-    formulario.addEventListener('submit', buscarClima);
+    form.addEventListener('submit', searchWeather);
 });
 
-function buscarClima(e){
+function searchWeather(e){
     e.preventDefault();
 
-    const ciudad = document.querySelector('#ciudad').value
-    const pais = document.querySelector('#pais').value
+    const city = document.querySelector('#city').value
+    const country = document.querySelector('#country').value
 
     //Validacion
-    if( ciudad === '' || pais === ''){
-        imprimirAlerta('Todos los campos son obligatorios');
+    if( city === '' || country === ''){
+        printMsj('All fields are required');
         return;
     }
 
     //Consulta a la API
-    consultarAPI(ciudad, pais);
+    consultarAPI(city, country);
 };
 
-function consultarAPI(ciudad, pais){
+function consultarAPI(city, country){
 
     const appID = '45e980ea1d8aa4bb9246e58c41d78224';
-    const url = `http://api.openweathermap.org/data/2.5/weather?q=${ciudad},${pais}&appid=${appID}`;
+    const url = `http://api.openweathermap.org/data/2.5/weather?q=${city},${country}&appid=${appID}`;
 
     // spinner();
 
     fetch(url)
-        .then( respuesta => respuesta.json())
-        .then( datos => {
+        .then( answer => answer.json())
+        .then( data => {
 
-            limpiarHTML();
+            cleanHTML();
 
-            if(datos.cod === '404'){
-                imprimirAlerta('Ciudad no encontrada');
+            if(data.cod === '404'){
+                printMsj('City not found');
                 return;
             };
 
-            mostrarClima(datos);
+            showWeather(data);
+            form.reset()
         });
 };
 
-function mostrarClima(datos){
-    const {name, main: {temp, temp_max, temp_min}} = datos;
+function showWeather(data){
+    const {name, main: {temp, temp_max, temp_min}} = data;
 
     const city = document.createElement('p');
-    city.textContent = `Ciudad: ${name}`;
+    city.textContent = `City: ${name}`;
     city.classList.add('font-bold', 'text-2xl');
 
-    const actual = kelvinAcelcius(temp);
-    const max = kelvinAcelcius(temp_max);
-    const min = kelvinAcelcius(temp_min);
+    const actual = kelvinTocelcius(temp);
+    const max = kelvinTocelcius(temp_max);
+    const min = kelvinTocelcius(temp_min);
 
     const tActual = document.createElement('p');
     tActual.innerHTML = `${actual} &#8451;`;
@@ -75,30 +76,30 @@ function mostrarClima(datos){
     div.appendChild(tMin);
     div.appendChild(tMax);
 
-    resultado.appendChild(div);
+    result.appendChild(div);
 
 };
 
-function limpiarHTML(){
-    while(resultado.firstChild){
-        resultado.removeChild(resultado.firstChild)
+function cleanHTML(){
+    while(result.firstChild){
+        result.removeChild(result.firstChild)
     }
 }
 
-const kelvinAcelcius = grados => parseInt(grados - 273); 
+const kelvinTocelcius = degrees => parseInt(degrees - 273); 
 
-function imprimirAlerta(mensaje){
+function printMsj(msj){
 
-    const alerta = document.querySelector('.alerta')
+    const alert = document.querySelector('.alert')
 
-    if(!alerta){
+    if(!alert){
     const msj = document.createElement('div');
-    msj.classList.add('bg-red-100', 'border-red-400', 'text-red-700', 'px-4', 'py-3', 'rounded', 'max-w-md', 'mx-auto', 'mt-6', 'text-center', 'alerta');
+    msj.classList.add('bg-red-100', 'border-red-400', 'text-red-700', 'px-4', 'py-3', 'rounded', 'max-w-md', 'mx-auto', 'mt-6', 'text-center', 'alert');
     msj.innerHTML = `
     <strong class="font-bold"> ¡Error! </strong>
-    <span class="block"> ${mensaje} </span>
+    <span class="block"> ${msj} </span>
     `;
-    contenido.appendChild(msj);
+    container.appendChild(msj);
 
     setTimeout(() => {
         msj.remove();
@@ -124,5 +125,5 @@ function spinner(){
         <div class="sk-circle11 sk-child"></div>
         <div class="sk-circle12 sk-child"></div>`
 
-        resultado.appendChild(spinner)
+        result.appendChild(spinner)
 }
